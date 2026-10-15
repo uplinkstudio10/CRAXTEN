@@ -107,8 +107,19 @@
       border: 1px solid #333;
       border-radius: 16px 16px 16px 0;
     }
-    .bubble ai pre { background: #2a2a2a; padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
-    .bubble ai code { background: #2a2a2a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace; }
+    .bubble ai pre { 
+      background: #2a2a2a; 
+      padding: 10px; 
+      border-radius: 6px; 
+      overflow-x: auto; 
+      margin: 8px 0; 
+    }
+    .bubble ai code { 
+      background: #2a2a2a; 
+      padding: 2px 6px; 
+      border-radius: 4px; 
+      font-family: 'Courier New', monospace; 
+    }
     .bubble ai pre code { background: transparent; padding: 0; }
     .message-meta {
       font-size: 11px;
@@ -167,12 +178,28 @@
     }
     .send-btn:hover { background: #00dd88; }
     .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .streaming {
-      color: #00ffaa;
+    .status-bar {
+      padding: 8px 16px;
+      background: #111;
+      border-top: 1px solid #333;
       font-size: 12px;
-      margin-top: 4px;
-      text-align: right;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
     }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ffaa;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .modal {
       position: fixed;
       top: 0;
@@ -261,28 +288,6 @@
       border-color: #00ffaa;
       color: #00ffaa;
     }
-    .status-bar {
-      padding: 8px 16px;
-      background: #111;
-      border-top: 1px solid #333;
-      font-size: 12px;
-      color: #666;
-      display: flex;
-      justify-content: space-between;
-    }
-    .status-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .status-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #00ffaa;
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     @media (max-width: 600px) {
       .message { max-width: 90%; }
       .bubble { font-size: 14px; padding: 10px 12px; }
@@ -353,9 +358,9 @@
 
   <script>
     // ========== CONFIG ==========
-    const NVIDIA_API_KEY = "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";
+    const SERVER_URL = window.location.origin || 'http://localhost:3000';
 
-    // Available models with their token budgets
+    // Available models
     const MODELS = {
       'nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron Super 120B', maxTokens: 8192 },
       'nvidia/nemotron-3-ultra-550b-a55b': { name: 'Nemotron Ultra 550B', maxTokens: 16384 },
@@ -363,15 +368,6 @@
       'deepseek-ai/deepseek-v4.1-flash': { name: 'DeepSeek V4.1', maxTokens: 8192 },
       'meta/llama-3.2-90b-vision-instruct': { name: 'Llama 3.2 90B', maxTokens: 8192 }
     };
-
-    // Fallback chain for auto-retry
-    const FALLBACK_CHAIN = [
-      'nvidia/nemotron-3-super-120b-a12b',
-      'nvidia/nemotron-3-ultra-550b-a55b',
-      'google/gemma-4-31b-it',
-      'deepseek-ai/deepseek-v4.1-flash',
-      'meta/llama-3.2-90b-vision-instruct'
-    ];
 
     // ========== STATE ==========
     let state = {
@@ -425,7 +421,6 @@
     }
 
     function formatMessage(text) {
-      // Format markdown-like content
       return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/`(.*?)`/g, '<code>$1</code>')
@@ -489,62 +484,7 @@
     }
 
     // ========== API CALL ==========
-    async function callNVIDIA(model, messages, maxTokens) {
-      const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + NVIDIA_API_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: messages,
-          temperature: state.temperature,
-          max_tokens: maxTokens,
-          stream: false
-        })
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        let detail = errText.substring(0, 100);
-        try {
-          const errJson = JSON.parse(errText);
-          detail = errJson.detail || errJson.message || errJson.title || detail;
-        } catch (e) {}
-        throw new Error(res.status + ': ' + detail);
-      }
-
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content || 'No response';
-      return { content, model };
-    }
-
-    // ========== FALLBACK SYSTEM ==========
-    async function callWithFallback(messages) {
-      const preferredModel = state.model;
-      const chain = FALLBACK_CHAIN.filter(m => m !== preferredModel);
-      const modelsToTry = [preferredModel, ...chain];
-      
-      const errors = [];
-      
-      for (const modelId of modelsToTry) {
-        try {
-          const modelInfo = MODELS[modelId];
-          const budget = Math.min(state.maxTokens, modelInfo.maxTokens);
-          const result = await callNVIDIA(modelId, messages, budget);
-          return result;
-        } catch (err) {
-          errors.push(err.message);
-          console.warn('Model failed:', modelId, err.message);
-        }
-      }
-      
-      throw new Error('All models failed: ' + errors.slice(0, 2).join(' | '));
-    }
-
-    // ========== SEND MESSAGE ==========
-    async function sendMessage() {
+    async function callAI() {
       const text = inputEl.value.trim();
       if (!text || state.loading) return;
 
@@ -569,15 +509,33 @@
           ...state.conversation
         ];
 
-        const result = await callWithFallback(messages);
+        const response = await fetch(`${SERVER_URL}/api/chat-fallback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: messages,
+            temperature: state.temperature,
+            max_tokens: state.maxTokens,
+            preferred_model: state.model
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'API Error');
+        }
+
+        const data = await response.json();
+        const reply = data.choices?.[0]?.message?.content || 'No response';
+        const modelUsed = data.model || state.model;
         const elapsed = Date.now() - startTime;
 
         removeThinkingMessage();
         responseTimeEl.textContent = elapsed + 'ms';
         
         // Add AI response
-        addMessage('ai', result.content, MODELS[result.model]?.name || result.model);
-        state.conversation.push({ role: 'assistant', content: result.content });
+        addMessage('ai', reply, MODELS[modelUsed]?.name || modelUsed);
+        state.conversation.push({ role: 'assistant', content: reply });
         
       } catch (err) {
         removeThinkingMessage();
@@ -602,13 +560,24 @@
     }
 
     // ========== INIT ==========
-    function init() {
-      // Populate model select
-      for (const [id, info] of Object.entries(MODELS)) {
-        const option = document.createElement('option');
-        option.value = id;
-        option.textContent = info.name + ' (' + info.maxTokens + ' tokens)';
-        modelSelect.appendChild(option);
+    async function init() {
+      // Load models from server
+      try {
+        const res = await fetch(`${SERVER_URL}/api/models`);
+        if (res.ok) {
+          const serverModels = await res.json();
+          Object.entries(serverModels).forEach(([id, info]) => {
+            if (!MODELS[id]) {
+              MODELS[id] = info;
+              const option = document.createElement('option');
+              option.value = id;
+              option.textContent = info.name + ' (' + info.maxTokens + ' tokens)';
+              modelSelect.appendChild(option);
+            }
+          });
+        }
+      } catch (e) {
+        console.log('Using default models');
       }
 
       // Update model status
@@ -623,7 +592,7 @@
         'Ask me anything! 💬');
 
       // Event listeners
-      sendBtn.addEventListener('click', sendMessage);
+      sendBtn.addEventListener('click', callAI);
       clearBtn.addEventListener('click', clearChat);
       settingsBtn.addEventListener('click', () => settingsModal.classList.add('show'));
       closeModal.addEventListener('click', () => settingsModal.classList.remove('show'));
@@ -650,7 +619,7 @@
       inputEl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
-          sendMessage();
+          callAI();
         }
       });
 
