@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CRAXTEN - Simple</title>
+  <title>CRAXTEN - AI Assistant</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -17,7 +17,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
     }
     .header {
@@ -27,13 +27,30 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
     }
     .title {
       font-weight: 700;
       color: #00ffaa;
       font-size: 18px;
     }
-    .clear-btn {
+    .header-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .model-select {
+      padding: 6px 10px;
+      background: #222;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .model-select:focus { outline: none; border-color: #00ffaa; }
+    .clear-btn, .settings-btn {
       background: #222;
       color: #888;
       border: none;
@@ -42,7 +59,7 @@
       cursor: pointer;
       font-size: 13px;
     }
-    .clear-btn:hover { background: #333; color: #fff; }
+    .clear-btn:hover, .settings-btn:hover { background: #333; color: #fff; }
     .messages {
       flex: 1;
       overflow-y: auto;
@@ -55,7 +72,9 @@
       display: flex;
       gap: 10px;
       max-width: 85%;
+      animation: fadeIn 0.3s ease;
     }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     .message.user { justify-content: flex-end; }
     .message.ai { align-items: flex-start; }
     .avatar {
@@ -67,57 +86,36 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-size: 14px;
+      font-size: 12px;
+      font-weight: 600;
     }
+    .avatar.ai { background: linear-gradient(135deg, #00ffaa, #00c4e0); }
+    .avatar.user { background: linear-gradient(135deg, #007acc, #00aaff); }
     .bubble {
-      padding: 10px 14px;
-      border-radius: 14px;
-      line-height: 1.5;
+      padding: 12px 16px;
+      border-radius: 16px;
+      line-height: 1.6;
       word-wrap: break-word;
     }
     .bubble.user {
       background: #007acc;
       color: #fff;
-      border-radius: 14px 14px 0 14px;
+      border-radius: 16px 16px 0 16px;
     }
     .bubble.ai {
       background: #1e1e1e;
       border: 1px solid #333;
-      border-radius: 14px 14px 14px 0;
+      border-radius: 16px 16px 16px 0;
     }
-    .input-area {
-      padding: 12px 16px;
-      background: #111;
-      border-top: 1px solid #333;
-      display: flex;
-      gap: 10px;
+    .bubble ai pre { background: #2a2a2a; padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+    .bubble ai code { background: #2a2a2a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace; }
+    .bubble ai pre code { background: transparent; padding: 0; }
+    .message-meta {
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+      padding-left: 4px;
     }
-    .input {
-      flex: 1;
-      padding: 10px 14px;
-      background: #222;
-      border: 1px solid #444;
-      border-radius: 8px;
-      color: #e0e0e0;
-      font-size: 15px;
-      resize: none;
-      max-height: 100px;
-      font-family: inherit;
-    }
-    .input:focus { outline: none; border-color: #00ffaa; }
-    .input::placeholder { color: #666; }
-    .send-btn {
-      padding: 10px 20px;
-      background: #00ffaa;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .send-btn:hover { background: #00dd88; }
-    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .thinking {
       display: flex;
       gap: 4px;
@@ -136,9 +134,160 @@
       0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
       30% { transform: translateY(-5px); opacity: 1; }
     }
+    .input-area {
+      padding: 12px 16px;
+      background: #111;
+      border-top: 1px solid #333;
+      display: flex;
+      gap: 10px;
+    }
+    .input {
+      flex: 1;
+      padding: 12px 16px;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 15px;
+      resize: none;
+      max-height: 150px;
+      font-family: inherit;
+    }
+    .input:focus { outline: none; border-color: #00ffaa; }
+    .input::placeholder { color: #666; }
+    .send-btn {
+      padding: 12px 20px;
+      background: #00ffaa;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .send-btn:hover { background: #00dd88; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .streaming {
+      color: #00ffaa;
+      font-size: 12px;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #333;
+    }
+    .modal-title {
+      color: #00ffaa;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .close-btn {
+      background: #333;
+      color: #888;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .close-btn:hover { background: #444; color: #fff; }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .form-slider {
+      width: 100%;
+      accent-color: #00ffaa;
+    }
+    .form-value {
+      color: #00ffaa;
+      font-weight: 600;
+      font-size: 14px;
+      margin-left: 8px;
+    }
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .model-option {
+      padding: 8px 12px;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .model-option:hover {
+      background: #2a2a2a;
+      border-color: #00ffaa;
+    }
+    .model-option.active {
+      background: #00ffaa20;
+      border-color: #00ffaa;
+      color: #00ffaa;
+    }
+    .status-bar {
+      padding: 8px 16px;
+      background: #111;
+      border-top: 1px solid #333;
+      font-size: 12px;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ffaa;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     @media (max-width: 600px) {
       .message { max-width: 90%; }
-      .bubble { font-size: 14px; }
+      .bubble { font-size: 14px; padding: 10px 12px; }
+      .header { flex-wrap: wrap; }
+      .model-select { max-width: 150px; }
     }
   </style>
 </head>
@@ -146,133 +295,387 @@
   <div id="app">
     <div class="header">
       <div class="title">CRAXTEN</div>
-      <button class="clear-btn" id="clearBtn">Clear</button>
+      <div class="header-controls">
+        <select class="model-select" id="modelSelect">
+          <option value="nvidia/nemotron-3-super-120b-a12b">Nemotron Super 120B</option>
+          <option value="nvidia/nemotron-3-ultra-550b-a55b">Nemotron Ultra 550B</option>
+          <option value="google/gemma-4-31b-it">Gemma 4 31B</option>
+          <option value="deepseek-ai/deepseek-v4.1-flash">DeepSeek V4.1</option>
+          <option value="meta/llama-3.2-90b-vision-instruct">Llama 3.2 90B</option>
+        </select>
+        <button class="settings-btn" id="settingsBtn">⚙️</button>
+        <button class="clear-btn" id="clearBtn">🗑️ Clear</button>
+      </div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
-      <textarea class="input" id="input" placeholder="Ask anything..." rows="1"></textarea>
-      <button class="send-btn" id="sendBtn">Send</button>
+      <textarea class="input" id="input" placeholder="Ask anything in English or Bengali..." rows="1"></textarea>
+      <button class="send-btn" id="sendBtn">Send →</button>
+    </div>
+    <div class="status-bar" id="statusBar">
+      <div class="status-item">
+        <span class="status-indicator"></span>
+        <span id="modelStatus">Nemotron Super 120B</span>
+      </div>
+      <div class="status-item">
+        <span id="messageCount">0 messages</span>
+      </div>
+      <div class="status-item">
+        <span id="responseTime">--ms</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Settings</div>
+        <button class="close-btn" id="closeModal">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Temperature: <span class="form-value" id="tempValue">0.7</span></label>
+        <input type="range" class="form-slider" id="tempSlider" min="0" max="2" step="0.1" value="0.7">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Max Tokens: <span class="form-value" id="maxTokensValue">8192</span></label>
+        <input type="range" class="form-slider" id="maxTokensSlider" min="1024" max="16384" step="1024" value="8192">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Language Preference</label>
+        <select class="model-select" id="langSelect">
+          <option value="auto">Auto Detect</option>
+          <option value="en">English Only</option>
+          <option value="bn">Bengali Preferred</option>
+        </select>
+      </div>
     </div>
   </div>
 
   <script>
+    // ========== CONFIG ==========
     const NVIDIA_API_KEY = "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";
-    const MODEL = "nvidia/nemotron-3-super-120b-a12b";
-    const MAX_TOKENS = 8192;
 
+    // Available models with their token budgets
+    const MODELS = {
+      'nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron Super 120B', maxTokens: 8192 },
+      'nvidia/nemotron-3-ultra-550b-a55b': { name: 'Nemotron Ultra 550B', maxTokens: 16384 },
+      'google/gemma-4-31b-it': { name: 'Gemma 4 31B', maxTokens: 8192 },
+      'deepseek-ai/deepseek-v4.1-flash': { name: 'DeepSeek V4.1', maxTokens: 8192 },
+      'meta/llama-3.2-90b-vision-instruct': { name: 'Llama 3.2 90B', maxTokens: 8192 }
+    };
+
+    // Fallback chain for auto-retry
+    const FALLBACK_CHAIN = [
+      'nvidia/nemotron-3-super-120b-a12b',
+      'nvidia/nemotron-3-ultra-550b-a55b',
+      'google/gemma-4-31b-it',
+      'deepseek-ai/deepseek-v4.1-flash',
+      'meta/llama-3.2-90b-vision-instruct'
+    ];
+
+    // ========== STATE ==========
+    let state = {
+      model: 'nvidia/nemotron-3-super-120b-a12b',
+      temperature: 0.7,
+      maxTokens: 8192,
+      language: 'auto',
+      conversation: [],
+      loading: false,
+      messageCount: 0
+    };
+
+    // ========== DOM ==========
     const messagesEl = document.getElementById('messages');
     const inputEl = document.getElementById('input');
     const sendBtn = document.getElementById('sendBtn');
     const clearBtn = document.getElementById('clearBtn');
+    const modelSelect = document.getElementById('modelSelect');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeModal = document.getElementById('closeModal');
+    const tempSlider = document.getElementById('tempSlider');
+    const tempValue = document.getElementById('tempValue');
+    const maxTokensSlider = document.getElementById('maxTokensSlider');
+    const maxTokensValue = document.getElementById('maxTokensValue');
+    const modelStatus = document.getElementById('modelStatus');
+    const messageCountEl = document.getElementById('messageCount');
+    const responseTimeEl = document.getElementById('responseTime');
+    const langSelect = document.getElementById('langSelect');
 
-    let conversation = [];
-    let loading = false;
+    // ========== SYSTEM PROMPT ==========
+    function getSystemPrompt() {
+      const base = "You are CRAXTEN, an advanced, helpful AI assistant. " +
+        "Be accurate, clear, and provide detailed answers. " +
+        "Use markdown for formatting code and lists. " +
+        "If you don't know something, say so.";
 
-    function addMessage(role, text) {
+      if (state.language === 'bn') {
+        return base + " Always respond in Bengali language.";
+      } else if (state.language === 'en') {
+        return base + " Always respond in English language.";
+      }
+      // Auto detect
+      return base + " If the user asks in Bengali, respond in Bengali. Otherwise, respond in English.";
+    }
+
+    // ========== HELPERS ==========
+    function isBengali(text) {
+      const bengaliRegex = /[\u0980-\u09FF]/;
+      return bengaliRegex.test(text);
+    }
+
+    function formatMessage(text) {
+      // Format markdown-like content
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function addMessage(role, text, modelName = null) {
       const msg = document.createElement('div');
       msg.className = 'message ' + role;
 
-      if (role === 'ai') {
-        const avatar = document.createElement('div');
-        avatar.className = 'avatar';
-        avatar.textContent = 'AI';
-        msg.appendChild(avatar);
-      }
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar ' + role;
+      avatar.textContent = role === 'ai' ? 'AI' : '👤';
+      msg.appendChild(avatar);
 
       const bubble = document.createElement('div');
       bubble.className = 'bubble ' + role;
-      bubble.textContent = text;
+      bubble.innerHTML = formatMessage(text);
+      msg.appendChild(bubble);
+
+      if (modelName) {
+        const meta = document.createElement('div');
+        meta.className = 'message-meta';
+        meta.textContent = 'via ' + modelName;
+        msg.appendChild(meta);
+      }
+
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      state.messageCount++;
+      messageCountEl.textContent = state.messageCount + ' messages';
+    }
+
+    function addThinkingMessage() {
+      const msg = document.createElement('div');
+      msg.className = 'message ai';
+      msg.id = 'thinking-msg';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar ai';
+      avatar.textContent = 'AI';
+      msg.appendChild(avatar);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ai';
+      const thinking = document.createElement('div');
+      thinking.className = 'thinking';
+      thinking.innerHTML = '<span></span><span></span><span></span>';
+      bubble.appendChild(thinking);
       msg.appendChild(bubble);
 
       messagesEl.appendChild(msg);
       messagesEl.scrollTop = messagesEl.scrollHeight;
+      return msg;
     }
 
-    async function callAI() {
+    function removeThinkingMessage() {
+      const thinkingMsg = document.getElementById('thinking-msg');
+      if (thinkingMsg) thinkingMsg.remove();
+    }
+
+    // ========== API CALL ==========
+    async function callNVIDIA(model, messages, maxTokens) {
+      const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + NVIDIA_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: messages,
+          temperature: state.temperature,
+          max_tokens: maxTokens,
+          stream: false
+        })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        let detail = errText.substring(0, 100);
+        try {
+          const errJson = JSON.parse(errText);
+          detail = errJson.detail || errJson.message || errJson.title || detail;
+        } catch (e) {}
+        throw new Error(res.status + ': ' + detail);
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || 'No response';
+      return { content, model };
+    }
+
+    // ========== FALLBACK SYSTEM ==========
+    async function callWithFallback(messages) {
+      const preferredModel = state.model;
+      const chain = FALLBACK_CHAIN.filter(m => m !== preferredModel);
+      const modelsToTry = [preferredModel, ...chain];
+      
+      const errors = [];
+      
+      for (const modelId of modelsToTry) {
+        try {
+          const modelInfo = MODELS[modelId];
+          const budget = Math.min(state.maxTokens, modelInfo.maxTokens);
+          const result = await callNVIDIA(modelId, messages, budget);
+          return result;
+        } catch (err) {
+          errors.push(err.message);
+          console.warn('Model failed:', modelId, err.message);
+        }
+      }
+      
+      throw new Error('All models failed: ' + errors.slice(0, 2).join(' | '));
+    }
+
+    // ========== SEND MESSAGE ==========
+    async function sendMessage() {
       const text = inputEl.value.trim();
-      if (!text || loading) return;
+      if (!text || state.loading) return;
 
       inputEl.value = '';
       inputEl.style.height = 'auto';
 
+      // Add user message
       addMessage('user', text);
-      conversation.push({ role: 'user', content: text });
+      state.conversation.push({ role: 'user', content: text });
 
-      loading = true;
+      // Add thinking indicator
+      state.loading = true;
       sendBtn.disabled = true;
-
-      const thinkingMsg = document.createElement('div');
-      thinkingMsg.className = 'message ai';
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      avatar.textContent = 'AI';
-      thinkingMsg.appendChild(avatar);
-      const thinking = document.createElement('div');
-      thinking.className = 'thinking';
-      thinking.innerHTML = '<span></span><span></span><span></span>';
-      thinkingMsg.appendChild(thinking);
-      messagesEl.appendChild(thinkingMsg);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      const startTime = Date.now();
+      addThinkingMessage();
 
       try {
-        const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + NVIDIA_API_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: MODEL,
-            messages: conversation,
-            temperature: 0.7,
-            max_tokens: MAX_TOKENS,
-            stream: false
-          })
-        });
+        // Build conversation with system prompt
+        const systemPrompt = getSystemPrompt();
+        const messages = [
+          { role: 'system', content: systemPrompt },
+          ...state.conversation
+        ];
 
-        if (!res.ok) {
-          const err = await res.text();
-          throw new Error(res.status + ': ' + (err.substring(0, 100) || 'API Error'));
-        }
+        const result = await callWithFallback(messages);
+        const elapsed = Date.now() - startTime;
 
-        const data = await res.json();
-        const reply = data.choices?.[0]?.message?.content || 'No response';
-
-        thinkingMsg.remove();
-        addMessage('ai', reply);
-        conversation.push({ role: 'assistant', content: reply });
+        removeThinkingMessage();
+        responseTimeEl.textContent = elapsed + 'ms';
+        
+        // Add AI response
+        addMessage('ai', result.content, MODELS[result.model]?.name || result.model);
+        state.conversation.push({ role: 'assistant', content: result.content });
+        
       } catch (err) {
-        thinkingMsg.remove();
-        addMessage('ai', 'Error: ' + err.message);
+        removeThinkingMessage();
+        addMessage('ai', '❌ Error: ' + err.message);
       } finally {
-        loading = false;
+        state.loading = false;
         sendBtn.disabled = false;
         inputEl.focus();
       }
     }
 
-    clearBtn.addEventListener('click', () => {
-      if (confirm('Clear chat?')) {
-        conversation = [];
+    // ========== CLEAR CHAT ==========
+    function clearChat() {
+      if (confirm('Clear all messages?')) {
+        state.conversation = [];
         messagesEl.innerHTML = '';
+        state.messageCount = 0;
+        messageCountEl.textContent = '0 messages';
+        responseTimeEl.textContent = '--ms';
+        addMessage('ai', 'Chat cleared. Ask me anything! 🚀');
       }
-    });
+    }
 
-    sendBtn.addEventListener('click', callAI);
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        callAI();
+    // ========== INIT ==========
+    function init() {
+      // Populate model select
+      for (const [id, info] of Object.entries(MODELS)) {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = info.name + ' (' + info.maxTokens + ' tokens)';
+        modelSelect.appendChild(option);
       }
-    });
-    inputEl.addEventListener('input', () => {
-      inputEl.style.height = 'auto';
-      inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
-    });
 
-    // Initial message
-    addMessage('ai', 'Hello! I am CRAXTEN, your AI assistant.\n\nAsk me anything!');
-    inputEl.focus();
+      // Update model status
+      modelSelect.value = state.model;
+      updateModelStatus();
+
+      // Initial message
+      addMessage('ai', '🌟 Hello! I am **CRAXTEN**, your AI assistant.\n\n' +
+        '✅ Powered by NVIDIA Serverless API\n' +
+        '✅ Free & Unlimited Tokens\n' +
+        '✅ Supports English & Bengali\n\n' +
+        'Ask me anything! 💬');
+
+      // Event listeners
+      sendBtn.addEventListener('click', sendMessage);
+      clearBtn.addEventListener('click', clearChat);
+      settingsBtn.addEventListener('click', () => settingsModal.classList.add('show'));
+      closeModal.addEventListener('click', () => settingsModal.classList.remove('show'));
+
+      modelSelect.addEventListener('change', (e) => {
+        state.model = e.target.value;
+        updateModelStatus();
+      });
+
+      tempSlider.addEventListener('input', (e) => {
+        state.temperature = parseFloat(e.target.value);
+        tempValue.textContent = state.temperature.toFixed(1);
+      });
+
+      maxTokensSlider.addEventListener('input', (e) => {
+        state.maxTokens = parseInt(e.target.value);
+        maxTokensValue.textContent = state.maxTokens;
+      });
+
+      langSelect.addEventListener('change', (e) => {
+        state.language = e.target.value;
+      });
+
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      inputEl.addEventListener('input', () => {
+        inputEl.style.height = 'auto';
+        inputEl.style.height = Math.min(inputEl.scrollHeight, 150) + 'px';
+      });
+
+      // Close modal on outside click
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+          settingsModal.classList.remove('show');
+        }
+      });
+
+      inputEl.focus();
+    }
+
+    function updateModelStatus() {
+      const info = MODELS[state.model];
+      modelStatus.textContent = (info?.name || state.model) + ' (' + state.maxTokens + ' tokens)';
+    }
+
+    // Initialize
+    init();
   </script>
 </body>
 </html>
