@@ -3,1134 +3,276 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="CRAXTEN - NVIDIA Serverless API" />
-  <meta name="theme-color" content="#080908" />
-  <title>CRAXTEN</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
-
+  <title>CRAXTEN - Simple</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       height: 100%;
-      background: #06080a;
-      color: #e8f0ee;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
     }
-    #app-root {
+    #app {
       display: flex;
       flex-direction: column;
-      height: 100dvh;
       height: 100vh;
-      max-width: 1200px;
+      max-width: 800px;
       margin: 0 auto;
-      position: relative;
-      background:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0, 255, 136, 0.12), transparent 50%),
-        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(0, 180, 255, 0.10), transparent 45%),
-        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(0, 255, 200, 0.06), transparent 40%),
-        linear-gradient(165deg, #07090b 0%, #0c1014 50%, #0a0e12 100%);
     }
-
-    /* Liquid glass surfaces — light blur for mid-range GPUs */
-    .glass {
-      background: rgba(18, 24, 28, 0.55);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      -webkit-backdrop-filter: blur(12px) saturate(140%);
-      backdrop-filter: blur(12px) saturate(140%);
+    .header {
+      padding: 14px 16px;
+      background: #111;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-      .glass, .app-header, .chat-input-area, .modal-content, .message.ai .message-content {
-        background: rgba(16, 22, 26, 0.92);
-      }
-    }
-
-    .app-header {
-      padding: 12px 14px;
-      padding-top: max(12px, env(safe-area-inset-top));
-      border-bottom: 1px solid rgba(0, 255, 180, 0.12);
-      background: rgba(12, 18, 22, 0.65);
-      -webkit-backdrop-filter: blur(14px) saturate(150%);
-      backdrop-filter: blur(14px) saturate(150%);
-      overflow-y: auto;
-      max-height: 280px;
-      transition: max-height 0.25s ease;
-      z-index: 10;
-    }
-    .app-header.collapsed { max-height: 72px; }
-
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
-    .brand-title {
-      font-size: 24px;
-      font-weight: 900;
-      background: linear-gradient(135deg, #5dffb0, #3dd4ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 2px;
-      flex-shrink: 0;
-    }
-
-    .header-actions { display: flex; gap: 4px; align-items: center; }
-    .header-btn {
-      padding: 8px 10px;
-      min-width: 40px;
-      min-height: 40px;
-      border: none;
-      background: rgba(255, 255, 255, 0.04);
-      color: #7dffc4;
-      border-radius: 12px;
-      cursor: pointer;
+    .title {
       font-weight: 700;
-      font-size: 16px;
-      transition: background 0.15s ease, transform 0.15s ease;
+      color: #00ffaa;
+      font-size: 18px;
     }
-    .header-btn:hover, .header-btn:active { background: rgba(0, 255, 180, 0.14); }
-    .header-btn:active { transform: scale(0.94); }
-    .toggle-btn { background: rgba(255, 255, 255, 0.04); color: #7dffc4; padding: 8px 10px; font-size: 18px; transition: transform 0.25s ease; }
-    .toggle-btn.collapsed { transform: rotate(180deg); }
-
-    .mode-selector { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-    .mode-btn {
-      padding: 8px 12px;
-      min-height: 36px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.04);
-      color: #c8d4d0;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
-    }
-    .mode-btn.active {
-      background: linear-gradient(135deg, rgba(0, 255, 160, 0.25), rgba(0, 200, 255, 0.2));
-      border-color: rgba(0, 255, 180, 0.45);
-      color: #e8fff6;
-      box-shadow: 0 0 16px rgba(0, 255, 160, 0.15);
-    }
-
-    .tab-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px; -webkit-overflow-scrolling: touch; }
-    .tab-btn {
-      padding: 8px 12px;
-      min-height: 36px;
+    .clear-btn {
+      background: #222;
+      color: #888;
       border: none;
-      background: rgba(255, 255, 255, 0.05);
-      color: #8a9890;
-      border-radius: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-      transition: background 0.15s, color 0.15s;
-    }
-    .tab-btn.active { background: rgba(0, 255, 160, 0.15); color: #5dffb0; }
-
-    .tab-content { display: none; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; margin-top: 6px; }
-    .tab-content.active { display: block; }
-
-    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .config-item { display: flex; flex-direction: column; gap: 4px; }
-    .config-label { font-size: 10px; font-weight: 700; color: #5dffb0; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .model-select {
-      padding: 10px 12px;
-      min-height: 42px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(0, 255, 180, 0.18);
-      color: #e8f0ee;
-      border-radius: 12px;
       font-size: 13px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: border-color 0.15s, background 0.15s;
     }
-    .model-select:focus { outline: none; border-color: rgba(0, 255, 180, 0.5); background: rgba(0, 255, 160, 0.06); }
-
-    .slider-container { display: flex; gap: 8px; align-items: center; }
-    .slider-container input { flex: 1; accent-color: #00ffaa; }
-    .slider-container span { font-weight: 700; color: #5dffb0; min-width: 28px; font-size: 12px; }
-
-    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .status-item { display: flex; flex-direction: column; gap: 4px; }
-    .status-label { font-size: 10px; font-weight: 700; color: #5dffb0; text-transform: uppercase; }
-    .status-value { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-    .status-indicator { width: 8px; height: 8px; border-radius: 50%; background: #5dffb0; animation: pulse 2.5s ease-in-out infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    .messages-container {
+    .clear-btn:hover { background: #333; color: #fff; }
+    .messages {
       flex: 1;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 14px 12px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    .message { display: flex; gap: 8px; animation: slideIn 0.25s ease; }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .message.user { justify-content: flex-end; }
-
-    .message-avatar {
-      width: 30px; height: 30px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; flex-shrink: 0;
-      background: linear-gradient(145deg, rgba(0, 255, 160, 0.35), rgba(0, 180, 255, 0.3));
-      border: 1px solid rgba(255, 255, 255, 0.12);
+    .message {
+      display: flex;
+      gap: 10px;
+      max-width: 85%;
     }
-    .message-content {
-      max-width: 84%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      word-wrap: break-word;
-      line-height: 1.5;
+    .message.user { justify-content: flex-end; }
+    .message.ai { align-items: flex-start; }
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #00ffaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
       font-size: 14px;
     }
-    .message.ai .message-content {
-      background: rgba(16, 28, 24, 0.7);
-      border: 1px solid rgba(0, 255, 160, 0.18);
-      border-left: 3px solid #5dffb0;
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-      border-radius: 4px 16px 16px 16px;
-    }
-    .message.user .message-content {
-      background: linear-gradient(145deg, rgba(0, 140, 220, 0.28), rgba(0, 200, 160, 0.2));
-      border: 1px solid rgba(0, 200, 255, 0.2);
-      border-right: 3px solid #5dffb0;
-      border-radius: 16px 4px 16px 16px;
-    }
-
-    .message-meta { font-size: 11px; opacity: 0.55; margin-top: 6px; }
-    .message-actions { display: flex; gap: 6px; margin-top: 8px; }
-    .message-action-btn {
-      padding: 6px 10px;
-      min-height: 32px;
-      background: rgba(0, 255, 160, 0.1);
-      border: 1px solid rgba(0, 255, 160, 0.25);
-      color: #5dffb0;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 600;
-      transition: background 0.15s;
-    }
-    .message-action-btn:active { background: rgba(0, 255, 160, 0.22); }
-
-    .thinking { display: flex; gap: 4px; align-items: center; height: 20px; padding: 4px 0; }
-    .thinking span { width: 7px; height: 7px; background: #5dffb0; border-radius: 50%; animation: thinking 1.4s ease-in-out infinite; }
-    .thinking span:nth-child(2) { animation-delay: 0.18s; }
-    .thinking span:nth-child(3) { animation-delay: 0.36s; }
-    @keyframes thinking { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-6px); opacity: 1; } }
-
-    .chat-input-area {
-      padding: 10px 12px;
-      padding-bottom: max(10px, env(safe-area-inset-bottom));
-      background: rgba(12, 18, 22, 0.7);
-      border-top: 1px solid rgba(0, 255, 180, 0.12);
-      -webkit-backdrop-filter: blur(14px) saturate(150%);
-      backdrop-filter: blur(14px) saturate(150%);
-      z-index: 10;
-    }
-    .input-row { display: flex; gap: 8px; align-items: flex-end; }
-    .message-input {
-      flex: 1;
-      padding: 12px 14px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(0, 255, 180, 0.18);
-      color: #e8f0ee;
+    .bubble {
+      padding: 10px 14px;
       border-radius: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    .bubble.user {
+      background: #007acc;
+      color: #fff;
+      border-radius: 14px 14px 0 14px;
+    }
+    .bubble.ai {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 14px 14px 14px 0;
+    }
+    .input-area {
+      padding: 12px 16px;
+      background: #111;
+      border-top: 1px solid #333;
+      display: flex;
+      gap: 10px;
+    }
+    .input {
+      flex: 1;
+      padding: 10px 14px;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #e0e0e0;
       font-size: 15px;
       resize: none;
       max-height: 100px;
-      transition: border-color 0.15s, background 0.15s;
       font-family: inherit;
-      -webkit-appearance: none;
     }
-    .message-input:focus { outline: none; border-color: rgba(0, 255, 180, 0.45); background: rgba(0, 255, 160, 0.05); }
-    .message-input::placeholder { color: rgba(200, 220, 210, 0.4); }
-
+    .input:focus { outline: none; border-color: #00ffaa; }
+    .input::placeholder { color: #666; }
     .send-btn {
-      padding: 12px 16px;
-      min-height: 46px;
+      padding: 10px 20px;
+      background: #00ffaa;
+      color: #000;
       border: none;
-      background: linear-gradient(135deg, #00e88a, #00c4e0);
-      color: #041208;
-      border-radius: 14px;
-      font-weight: 800;
+      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 4px 14px rgba(0, 220, 160, 0.25);
-      flex-shrink: 0;
-    }
-    .send-btn:active { transform: scale(0.96); }
-    .send-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-
-    .scroll-btn {
-      position: absolute;
-      bottom: 90px;
-      right: 16px;
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #00e88a, #00c4e0);
-      border: none;
-      color: #041208;
-      font-size: 18px;
-      cursor: pointer;
-      display: none;
-      font-weight: 700;
-      box-shadow: 0 4px 14px rgba(0, 220, 160, 0.3);
-      z-index: 5;
-    }
-    .scroll-btn.show { display: flex; align-items: center; justify-content: center; }
-
-    .modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.55);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000;
-      -webkit-backdrop-filter: blur(6px);
-      backdrop-filter: blur(6px);
-      padding: 16px;
-    }
-    .modal-content {
-      background: rgba(14, 20, 24, 0.88);
-      border: 1px solid rgba(0, 255, 180, 0.2);
-      border-radius: 18px;
-      padding: 18px;
-      max-width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      width: 560px;
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-      backdrop-filter: blur(16px) saturate(140%);
-      animation: modalIn 0.22s ease;
-    }
-    @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(0, 255, 180, 0.12); }
-    .modal-header h2 { margin: 0; font-size: 17px; color: #5dffb0; }
-    .modal-close {
-      background: rgba(0, 255, 160, 0.1);
-      border: 1px solid rgba(0, 255, 160, 0.25);
-      color: #5dffb0;
-      border-radius: 10px;
-      padding: 8px 12px;
-      min-height: 36px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .history-list { max-height: 360px; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 14px; }
-    .history-item {
-      padding: 12px;
-      background: rgba(0, 255, 160, 0.06);
-      border: 1px solid rgba(0, 200, 255, 0.1);
-      border-left: 3px solid #00c4e0;
-      border-radius: 12px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .history-item:active { background: rgba(0, 255, 160, 0.12); }
-    .history-date { font-size: 11px; opacity: 0.7; margin-top: 4px; color: #3dd4ff; }
-
-    .btn {
-      flex: 1;
-      padding: 12px 16px;
-      min-height: 44px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 700;
-      background: linear-gradient(135deg, #00e88a, #00c4e0);
-      color: #041208;
-      transition: transform 0.15s;
-    }
-    .btn:active { transform: scale(0.97); }
-    .modal-actions { display: flex; gap: 8px; margin-top: 12px; }
-
-    .unlimited-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #00e88a, #00c4e0);
-      color: #041208;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    .search-main-answer {
-      margin-bottom: 10px;
-      padding: 12px 14px;
-      background: rgba(0, 255, 160, 0.1);
-      border-radius: 12px;
-      border-left: 3px solid #5dffb0;
-      line-height: 1.55;
       font-size: 14px;
     }
-    .sources-box { margin-top: 8px; }
-    .sources-box summary {
-      display: inline-block;
-      cursor: pointer;
-      padding: 8px 12px;
-      min-height: 36px;
-      background: rgba(0, 180, 255, 0.1);
-      border: 1px solid rgba(0, 180, 255, 0.3);
-      border-radius: 10px;
-      color: #3dd4ff;
-      font-size: 12px;
-      font-weight: 700;
-      list-style: none;
-      user-select: none;
+    .send-btn:hover { background: #00dd88; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .thinking {
+      display: flex;
+      gap: 4px;
+      padding: 8px 0;
     }
-    .sources-box summary::-webkit-details-marker { display: none; }
-    .sources-box summary:active { background: rgba(0, 180, 255, 0.2); }
-    .sources-box[open] summary { margin-bottom: 8px; }
-    .sources-list { padding: 2px 0; }
-    .search-result-item {
-      margin-bottom: 8px;
-      padding: 10px;
-      background: rgba(0, 180, 255, 0.05);
-      border-radius: 10px;
-      border-left: 2px solid #00c4e0;
+    .thinking span {
+      width: 6px;
+      height: 6px;
+      background: #00ffaa;
+      border-radius: 50%;
+      animation: dot 1.4s ease-in-out infinite;
     }
-    .search-result-title { font-weight: 700; color: #5dffb0; margin-bottom: 3px; font-size: 13px; }
-    .search-result-url { font-size: 11px; color: #3dd4ff; word-break: break-all; }
-    .search-result-content { font-size: 12px; opacity: 0.85; }
-
-    /* Mid-range phone optimizations */
-    @media (max-width: 768px) {
-      .config-grid { grid-template-columns: 1fr; }
-      .message-content { max-width: 90%; font-size: 14px; }
-      .modal-content { width: 100%; max-width: 100%; border-radius: 16px; }
-      .brand-title { font-size: 20px; letter-spacing: 1.5px; }
-      .app-header { max-height: 55vh; }
-      /* lighter blur on small screens */
-      .app-header, .chat-input-area {
-        -webkit-backdrop-filter: blur(10px);
-        backdrop-filter: blur(10px);
-      }
-      .message.ai .message-content {
-        -webkit-backdrop-filter: blur(6px);
-        backdrop-filter: blur(6px);
-      }
+    .thinking span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-5px); opacity: 1; }
     }
-    @media (max-width: 380px) {
-      .header-btn { min-width: 36px; padding: 6px 8px; font-size: 14px; }
-      .mode-btn { padding: 6px 10px; font-size: 10px; }
-      .brand-title { font-size: 18px; }
-    }
-    /* Prefer reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+    @media (max-width: 600px) {
+      .message { max-width: 90%; }
+      .bubble { font-size: 14px; }
     }
   </style>
 </head>
 <body>
-
-<div id="app-root">
-  <header class="app-header" id="appHeader">
-    <div class="header-top">
-      <h1 class="brand-title">CRAXTEN</h1>
-      <div class="header-actions">
-        <button id="newChatBtn" class="header-btn" title="New Chat">➕</button>
-        <button id="historyBtn" class="header-btn" title="Chat History">📋</button>
-        <button id="clearBtn" class="header-btn" title="Clear">🗑️</button>
-        <button id="toggleConfigBtn" class="toggle-btn header-btn" title="Toggle">✕</button>
-      </div>
+  <div id="app">
+    <div class="header">
+      <div class="title">CRAXTEN</div>
+      <button class="clear-btn" id="clearBtn">Clear</button>
     </div>
-
-    <div class="mode-selector" id="modeSelector">
-      <button class="mode-btn active" data-mode="chat">💬 Chat</button>
-      <button class="mode-btn" data-mode="search">🔍 Search</button>
-      <button class="mode-btn" data-mode="hybrid">🚀 Hybrid</button>
-    </div>
-
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="config">⚙️ Config</button>
-      <button class="tab-btn" data-tab="status">📊 Status</button>
-    </div>
-
-    <div class="tab-content active" id="tab-config">
-      <div class="config-grid">
-        <div class="config-item" id="modelConfigItem">
-          <label class="config-label">🚀 AI Model</label>
-          <select id="modelSelect" class="model-select"></select>
-          <span class="unlimited-badge">✓ per-model budget · auto-fallback</span>
-        </div>
-        <div class="config-item" id="searchConfigItem" style="display:none;">
-          <label class="config-label">🔍 Search Engine</label>
-          <select id="searchSelect" class="model-select">
-            <option value="tavily">🔍 Tavily</option>
-            <option value="exa">🔎 Exa</option>
-            <option value="bytez">🌐 Bytez</option>
-            <option value="bazaarlink">🛒 BazaarLink</option>
-          </select>
-        </div>
-        <div class="config-item">
-          <label class="config-label">🌡️ Temperature</label>
-          <div class="slider-container">
-            <input type="range" id="tempSlider" min="0" max="2" step="0.1" value="0.7" />
-            <span id="tempValue">0.7</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-content" id="tab-status">
-      <div class="status-grid">
-        <div class="status-item">
-          <div class="status-label">⚡ API Status</div>
-          <div class="status-value"><span class="status-indicator"></span>NVIDIA Serverless</div>
-        </div>
-        <div class="status-item">
-          <div class="status-label">♾️ Limit</div>
-          <div class="status-value">UNLIMITED · 1M Tokens</div>
-        </div>
-        <div class="status-item">
-          <div class="status-label">💬 Messages</div>
-          <div id="messageCount" class="status-value">0</div>
-        </div>
-        <div class="status-item">
-          <div class="status-label">⏱️ Response</div>
-          <div id="responseTime" class="status-value">--ms</div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main id="messagesContainer" class="messages-container"></main>
-  <button id="scrollToBottom" class="scroll-btn">↓</button>
-
-  <footer class="chat-input-area">
-    <div class="input-row">
-      <textarea id="messageInput" class="message-input" placeholder="Ask unlimited... No token limits! 🚀" rows="1"></textarea>
-      <button id="sendBtn" class="send-btn">SEND ➜</button>
-    </div>
-  </footer>
-</div>
-
-<div id="historyModal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>📋 Chat History</h2>
-      <button class="modal-close" id="closeHistoryBtn">✕</button>
-    </div>
-    <div id="historyList" class="history-list"></div>
-    <div class="modal-actions">
-      <button id="exportHistoryBtn" class="btn">📥 Export</button>
-      <button id="clearHistoryBtn" class="btn">🗑️ Clear</button>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <textarea class="input" id="input" placeholder="Ask anything..." rows="1"></textarea>
+      <button class="send-btn" id="sendBtn">Send</button>
     </div>
   </div>
-</div>
 
-<script>
-  const NVIDIA_API_KEY = "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";
-  const TAVILY_API_KEY = "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";
-  const EXA_API_KEY = "c6f6fe81-f6d6-4a46-a7ee-1887216305ee";
-  const BYTEZ_API_KEY = "e22f52c699b71b327d3a22d50be7064e";
-  const BAZAARLINK_API_KEY = "sk-bl-JKU6cMm-M25_VBlUCQbBbxvL4aflYSAB0o6d2NuwiTn7a54I";
+  <script>
+    const NVIDIA_API_KEY = "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";
+    const MODEL = "nvidia/nemotron-3-super-120b-a12b";
+    const MAX_TOKENS = 8192;
 
-  // Free NVIDIA NIM models (India/global free endpoints) + per-model token budget
-  const NVIDIA_MODELS = [
-    { value: 'nvidia/nemotron-3-super-120b-a12b', label: '🚀 Nemotron Super 120B', maxTokens: 8192 },
-    { value: 'nvidia/nemotron-3-ultra-550b-a55b', label: '👑 Nemotron Ultra 550B', maxTokens: 16384 },
-    { value: 'nvidia/nemotron-3.5-lightning-30b-a3b', label: '⚡ Nemotron Lightning 30B', maxTokens: 8192 },
-    { value: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning', label: '🧠 Nemotron Nano Omni 30B', maxTokens: 8192 },
-    { value: 'moonshotai/kimi-k3', label: '🌙 Kimi K3', maxTokens: 8192 },
-    { value: 'z-ai/glm-5.3', label: '🧩 GLM 5.3', maxTokens: 8192 },
-    { value: 'z-ai/glm-5.3-flash', label: '⚡ GLM 5.3 Flash', maxTokens: 4096 },
-    { value: 'deepseek-ai/deepseek-v4.1-flash', label: '🌊 DeepSeek V4.1 Flash', maxTokens: 8192 },
-    { value: 'google/gemma-4-31b-it', label: '💎 Gemma 4 31B', maxTokens: 8192 },
-    { value: 'meta/muse-glimmer-30b', label: '✨ Muse Glimmer 30B', maxTokens: 8192 },
-    { value: 'poolside/laguna-xs-2.1', label: '🏊 Laguna XS 2.1', maxTokens: 8192 },
-    { value: 'openai/gpt-oss-20b', label: '🔓 GPT-OSS 20B', maxTokens: 4096 },
-    { value: 'meta/llama-3.2-11b-vision-instruct', label: '🦙 Llama 3.2 11B Vision', maxTokens: 4096 },
-    { value: 'meta/llama-3.2-90b-vision-instruct', label: '🦙 Llama 3.2 90B Vision', maxTokens: 8192 },
-    { value: 'nvidia/llama-3.3-nemotron-super-49b-v1', label: '🚀 Nemotron Super 49B', maxTokens: 8192 },
-    { value: 'nvidia/llama-3.1-nemotron-ultra-253b-v1', label: '👑 Nemotron Ultra 253B', maxTokens: 8192 }
-  ];
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-  const state = {
-    mode: 'chat',
-    messages: [],
-    history: [],
-    loading: false,
-    model: 'nvidia/nemotron-3-super-120b-a12b',
-    searchEngine: 'tavily',
-    temperature: 0.7,
-    maxTokens: 1000000,
-    headerCollapsed: false
-  };
+    let conversation = [];
+    let loading = false;
 
-  const messagesContainer = document.getElementById('messagesContainer');
-  const messageInput = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const historyBtn = document.getElementById('historyBtn');
-  const newChatBtn = document.getElementById('newChatBtn');
-  const toggleConfigBtn = document.getElementById('toggleConfigBtn');
-  const appHeader = document.getElementById('appHeader');
-  const modeSelector = document.getElementById('modeSelector');
-  const modelSelect = document.getElementById('modelSelect');
-  const searchSelect = document.getElementById('searchSelect');
-  const tempSlider = document.getElementById('tempSlider');
-  const tempValue = document.getElementById('tempValue');
-  const messageCount = document.getElementById('messageCount');
-  const responseTime = document.getElementById('responseTime');
-  const scrollBtn = document.getElementById('scrollToBottom');
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const historyModal = document.getElementById('historyModal');
-  const modelConfigItem = document.getElementById('modelConfigItem');
-  const searchConfigItem = document.getElementById('searchConfigItem');
+    function addMessage(role, text) {
+      const msg = document.createElement('div');
+      msg.className = 'message ' + role;
 
-  window.addEventListener('load', () => {
-    initModelSelect();
-    updateConfigVisibility();
-    var meta0 = NVIDIA_MODELS.find(function(m) { return m.value === state.model; });
-    var badge0 = document.querySelector('#modelConfigItem .unlimited-badge');
-    if (badge0 && meta0) badge0.textContent = '✓ ' + meta0.maxTokens + ' tok · auto-fallback';
-    messageInput.focus();
-    addMessage('ai', '🎉 Welcome to CRAXTEN\n\n✨ NVIDIA Serverless API\n✨ Unlimited Tokens (1M)\n✨ No Rate Limits\n✨ No Budget Restrictions\n✨ Search: Tavily · Exa · Bytez · BazaarLink\n\nAsk anything! 🚀', { icon: '🤖', source: 'System' });
-  });
-
-  function initModelSelect() {
-    NVIDIA_MODELS.forEach(model => {
-      const option = document.createElement('option');
-      option.value = model.value;
-      option.textContent = model.label;
-      modelSelect.appendChild(option);
-    });
-  }
-
-  function updateConfigVisibility() {
-    if (state.mode === 'chat') {
-      modelConfigItem.style.display = '';
-      searchConfigItem.style.display = 'none';
-    } else if (state.mode === 'search') {
-      modelConfigItem.style.display = 'none';
-      searchConfigItem.style.display = '';
-    } else {
-      modelConfigItem.style.display = '';
-      searchConfigItem.style.display = '';
-    }
-  }
-
-  sendBtn.addEventListener('click', sendMessage);
-  messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  });
-
-  clearBtn.addEventListener('click', () => {
-    if (confirm('Clear all?')) {
-      state.messages = [];
-      messagesContainer.innerHTML = '';
-      messageCount.textContent = '0';
-      addMessage('ai', 'Chat cleared ✓', { icon: '✓' });
-    }
-  });
-
-  newChatBtn.addEventListener('click', () => {
-    state.messages = [];
-    messagesContainer.innerHTML = '';
-    messageCount.textContent = '0';
-    responseTime.textContent = '--ms';
-    addMessage('ai', '🆕 New chat started\n\nAsk anything! 🚀', { icon: '🤖', source: 'System' });
-    messageInput.focus();
-  });
-
-  toggleConfigBtn.addEventListener('click', () => {
-    state.headerCollapsed = !state.headerCollapsed;
-    appHeader.classList.toggle('collapsed');
-    toggleConfigBtn.classList.toggle('collapsed');
-  });
-
-  historyBtn.addEventListener('click', () => {
-    const historyList = document.getElementById('historyList');
-    if (state.history.length === 0) {
-      historyList.innerHTML = '<div style="opacity:0.6;text-align:center;padding:20px;">No history yet</div>';
-    } else {
-      historyList.innerHTML = state.history.map((item, idx) => {
-        const d = new Date(item.timestamp);
-        const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
-        return '<div class="history-item" data-idx="' + idx + '">' +
-          '<div><strong>Q:</strong> ' + escapeHtml(item.text.substring(0, 80)) + (item.text.length > 80 ? '...' : '') + '</div>' +
-          '<div class="history-date">📅 ' + dateStr + '</div>' +
-          '</div>';
-      }).join('');
-      historyList.querySelectorAll('.history-item').forEach(el => {
-        el.addEventListener('click', () => {
-          const idx = parseInt(el.dataset.idx);
-          const item = state.history[idx];
-          messageInput.value = item.text;
-          historyModal.style.display = 'none';
-          sendMessage();
-        });
-      });
-    }
-
-    document.getElementById('exportHistoryBtn').onclick = () => {
-      const blob = new Blob([JSON.stringify(state.history, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'craxten-history.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    document.getElementById('clearHistoryBtn').onclick = () => {
-      if (confirm('Clear history?')) {
-        state.history = [];
-        historyList.innerHTML = '<div style="opacity:0.6;text-align:center;padding:20px;">No history yet</div>';
+      if (role === 'ai') {
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = 'AI';
+        msg.appendChild(avatar);
       }
-    };
 
-    historyModal.style.display = 'flex';
-  });
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + role;
+      bubble.textContent = text;
+      msg.appendChild(bubble);
 
-  document.getElementById('closeHistoryBtn').addEventListener('click', () => {
-    historyModal.style.display = 'none';
-  });
-
-  modeSelector.addEventListener('click', (e) => {
-    if (e.target.classList.contains('mode-btn')) {
-      modeSelector.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-      e.target.classList.add('active');
-      state.mode = e.target.dataset.mode;
-      updateConfigVisibility();
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
     }
-  });
 
-  tempSlider.addEventListener('input', (e) => {
-    state.temperature = parseFloat(e.target.value);
-    tempValue.textContent = state.temperature.toFixed(1);
-  });
+    async function callAI() {
+      const text = inputEl.value.trim();
+      if (!text || loading) return;
 
-  modelSelect.addEventListener('change', (e) => {
-    state.model = e.target.value;
-    var meta = NVIDIA_MODELS.find(function(m) { return m.value === state.model; });
-    var badge = document.querySelector('#modelConfigItem .unlimited-badge');
-    if (badge && meta) {
-      badge.textContent = '✓ ' + meta.maxTokens + ' tok · auto-fallback';
-    }
-  });
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
 
-  searchSelect.addEventListener('change', (e) => {
-    state.searchEngine = e.target.value;
-  });
+      addMessage('user', text);
+      conversation.push({ role: 'user', content: text });
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      document.getElementById(e.target.dataset.tab).classList.add('active');
-    });
-  });
+      loading = true;
+      sendBtn.disabled = true;
 
-  messagesContainer.addEventListener('scroll', () => {
-    const isBottom = messagesContainer.scrollTop + messagesContainer.clientHeight >= messagesContainer.scrollHeight - 100;
-    scrollBtn.classList.toggle('show', !isBottom);
-  });
-
-  scrollBtn.addEventListener('click', () => {
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  });
-
-  messageInput.addEventListener('input', () => {
-    messageInput.style.height = 'auto';
-    messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
-  });
-
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  function addMessage(role, content, metadata) {
-    metadata = metadata || {};
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'message ' + role;
-
-    if (role === 'ai') {
+      const thinkingMsg = document.createElement('div');
+      thinkingMsg.className = 'message ai';
       const avatar = document.createElement('div');
-      avatar.className = 'message-avatar';
-      avatar.innerHTML = metadata.icon || '🤖';
-      msgDiv.appendChild(avatar);
-    }
+      avatar.className = 'avatar';
+      avatar.textContent = 'AI';
+      thinkingMsg.appendChild(avatar);
+      const thinking = document.createElement('div');
+      thinking.className = 'thinking';
+      thinking.innerHTML = '<span></span><span></span><span></span>';
+      thinkingMsg.appendChild(thinking);
+      messagesEl.appendChild(thinkingMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
 
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
-    if (metadata.isHtml) {
-      contentDiv.innerHTML = content;
-    } else {
-      contentDiv.innerHTML = escapeHtml(content).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong style="color:#00ff88;">$1</strong>');
-    }
-
-    if (role === 'ai') {
-      const metaDiv = document.createElement('div');
-      metaDiv.className = 'message-meta';
-      metaDiv.innerHTML = '📍 ' + (metadata.source || 'AI');
-      contentDiv.appendChild(metaDiv);
-
-      const actionsDiv = document.createElement('div');
-      actionsDiv.className = 'message-actions';
-      const listenBtn = document.createElement('button');
-      listenBtn.className = 'message-action-btn';
-      listenBtn.innerHTML = '🔊 Listen';
-      listenBtn.onclick = function() {
-        if ('speechSynthesis' in window) {
-          speechSynthesis.cancel();
-          const plain = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-          const utter = new SpeechSynthesisUtterance(plain);
-          speechSynthesis.speak(utter);
-        }
-      };
-      actionsDiv.appendChild(listenBtn);
-      contentDiv.appendChild(actionsDiv);
-    }
-
-    msgDiv.appendChild(contentDiv);
-    messagesContainer.appendChild(msgDiv);
-    setTimeout(function() { messagesContainer.scrollTop = messagesContainer.scrollHeight; }, 50);
-  }
-
-  async function searchTavily(query) {
-    let res;
-    try {
-      res = await fetch('https://api.tavily.com/search', {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          api_key: TAVILY_API_KEY,
-          query: query,
-          search_depth: 'basic',
-          max_results: 5,
-          include_answer: true
-        })
-      });
-    } catch (e) {
-      throw new Error('Tavily network error: ' + (e.message || 'Failed to fetch'));
-    }
-    if (!res.ok) throw new Error('Tavily API error: ' + res.status);
-    return await res.json();
-  }
-
-  async function searchExa(query) {
-    let res;
-    try {
-      res = await fetch('https://api.exa.ai/search', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'x-api-key': EXA_API_KEY
-        },
-        body: JSON.stringify({
-          query: query,
-          type: 'auto',
-          numResults: 5,
-          contents: { highlights: true }
-        })
-      });
-    } catch (e) {
-      throw new Error('Exa network error: ' + (e.message || 'Failed to fetch'));
-    }
-    if (!res.ok) throw new Error('Exa API error: ' + res.status);
-    return await res.json();
-  }
-
-  async function searchBazaarlink(query) {
-    let res;
-    try {
-      res = await fetch('https://api.bazaarlink.ai/v1/search', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Authorization': 'Bearer ' + BAZAARLINK_API_KEY,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          query: query,
-          search_depth: 'basic',
-          max_results: 5
-        })
-      });
-    } catch (e) {
-      throw new Error('BazaarLink network error: ' + (e.message || 'Failed to fetch'));
-    }
-    if (!res.ok) throw new Error('BazaarLink API error: ' + res.status);
-    return await res.json();
-  }
-
-  async function searchBytez(query) {
-    try {
-      const res = await fetch('https://api.bytez.com/models/v2/run/google/flan-t5-large', {
-        method: 'POST',
-        headers: {
-          'Authorization': BYTEZ_API_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          input: 'Search the web and summarize results for: ' + query
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return { answer: data.output || data.result || JSON.stringify(data), results: [] };
-      }
-    } catch (e) {}
-    return { answer: 'Bytez is primarily a model inference API. For web search try Tavily, Exa, or BazaarLink.', results: [] };
-  }
-
-  function stripLinks(text) {
-    if (!text) return '';
-    // remove markdown links, raw urls, and bare www.
-    return String(text)
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      .replace(/https?:\/\/\S+/gi, '')
-      .replace(/www\.\S+/gi, '')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-  }
-
-  function buildSourcesHtml(results) {
-    if (!results || !results.length) return '';
-    var items = '';
-    results.forEach(function(r) {
-      var title = escapeHtml(r.title || 'Source');
-      var url = escapeHtml(r.url || '#');
-      items += '<div class="search-result-item">' +
-        '<div class="search-result-title">' + title + '</div>' +
-        '<div class="search-result-url"><a href="' + url + '" target="_blank" rel="noopener" style="color:#00d4ff;">' + url + '</a></div>' +
-        '</div>';
-    });
-    return '<details class="sources-box">' +
-      '<summary>📎 Sources (' + results.length + ')</summary>' +
-      '<div class="sources-list">' + items + '</div>' +
-      '</details>';
-  }
-
-  function formatSearchResults(engine, data) {
-    var html = '';
-    var results = data.results || [];
-    var mainAnswer = '';
-
-    if (engine === 'tavily' || engine === 'bazaarlink') {
-      if (data.answer) {
-        mainAnswer = data.answer;
-      } else if (results.length) {
-        // synthesize short answer from first result text only (no links)
-        mainAnswer = results[0].content || results[0].snippet || results[0].title || '';
-      }
-    } else if (engine === 'exa') {
-      if (results.length) {
-        var first = results[0];
-        mainAnswer = (first.highlights || []).join(' ') || first.text || first.title || '';
-      }
-    } else {
-      mainAnswer = data.answer || '';
-    }
-
-    mainAnswer = stripLinks(mainAnswer);
-
-    if (mainAnswer) {
-      html += '<div class="search-main-answer">' + escapeHtml(mainAnswer) + '</div>';
-    }
-
-    // links only inside Sources
-    html += buildSourcesHtml(results);
-
-    if (!html) html = '<div>No results found.</div>';
-    return html;
-  }
-
-  async function doSearch(query) {
-    const engine = state.searchEngine;
-    let data;
-    if (engine === 'tavily') data = await searchTavily(query);
-    else if (engine === 'exa') data = await searchExa(query);
-    else if (engine === 'bazaarlink') data = await searchBazaarlink(query);
-    else data = await searchBytez(query);
-    return { engine: engine, data: data, formatted: formatSearchResults(engine, data) };
-  }
-
-  function getModelBudget(modelId) {
-    var found = NVIDIA_MODELS.find(function(m) { return m.value === modelId; });
-    if (found && found.maxTokens) return Math.min(state.maxTokens, found.maxTokens);
-    return Math.min(state.maxTokens, 8192);
-  }
-
-  function getFallbackChain(preferred) {
-    var chain = [];
-    var preferredMeta = NVIDIA_MODELS.find(function(m) { return m.value === preferred; });
-    if (preferredMeta) chain.push(preferredMeta);
-    NVIDIA_MODELS.forEach(function(m) {
-      if (m.value !== preferred) chain.push(m);
-    });
-    return chain;
-  }
-
-  async function callNVIDIAOnce(modelId, messages, maxTokens) {
-    var res;
-    try {
-      res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Authorization': 'Bearer ' + NVIDIA_API_KEY,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          model: modelId,
-          messages: messages,
-          temperature: state.temperature,
-          max_tokens: maxTokens,
-          stream: false
-        })
-      });
-    } catch (netErr) {
-      throw new Error('Network: ' + (netErr.message || 'Failed to fetch'));
-    }
-    if (!res.ok) {
-      var errText = await res.text();
-      var detail = errText.substring(0, 120);
       try {
-        var j = JSON.parse(errText);
-        detail = j.detail || j.title || j.message || detail;
-      } catch (e) {}
-      throw new Error(res.status + ': ' + detail);
-    }
-    var data = await res.json();
-    var content = data.choices && data.choices[0] && data.choices[0].message
-      ? data.choices[0].message.content
-      : 'No response';
-    return { content: content, model: modelId };
-  }
-
-  // Auto-fallback: try preferred model, then every other free model in order
-  async function chatNVIDIA(messages) {
-    var chain = getFallbackChain(state.model);
-    var errors = [];
-    for (var i = 0; i < chain.length; i++) {
-      var m = chain[i];
-      var budget = getModelBudget(m.value);
-      try {
-        var result = await callNVIDIAOnce(m.value, messages, budget);
-        // remember last successful model for UI (optional)
-        if (m.value !== state.model) {
-          console.log('Fallback success:', m.value);
-        }
-        return result;
-      } catch (err) {
-        errors.push(m.label + ' → ' + err.message);
-        console.warn('Model failed:', m.value, err.message);
-      }
-    }
-    throw new Error('All models failed. ' + errors.slice(0, 3).join(' | '));
-  }
-
-  async function sendMessage() {
-    const text = messageInput.value.trim();
-    if (!text || state.loading) return;
-
-    messageInput.value = '';
-    messageInput.style.height = 'auto';
-    addMessage('user', text);
-    state.messages.push({ role: 'user', content: text });
-    state.loading = true;
-    sendBtn.disabled = true;
-
-    const thinkingDiv = document.createElement('div');
-    thinkingDiv.className = 'message ai';
-    const avatar = document.createElement('div');
-    avatar.className = 'message-avatar';
-    avatar.innerHTML = '🤔';
-    thinkingDiv.appendChild(avatar);
-    const thinking = document.createElement('div');
-    thinking.className = 'thinking';
-    thinking.innerHTML = '<span></span><span></span><span></span>';
-    thinkingDiv.appendChild(thinking);
-    messagesContainer.appendChild(thinkingDiv);
-
-    const startTime = Date.now();
-
-    try {
-      let content = '';
-      let source = 'NVIDIA Serverless';
-      let isHtml = false;
-      let icon = '🤖';
-
-      if (state.mode === 'search') {
-        const result = await doSearch(text);
-        content = result.formatted;
-        source = result.engine.charAt(0).toUpperCase() + result.engine.slice(1) + ' Search';
-        isHtml = true;
-        icon = '🔍';
-      } else if (state.mode === 'hybrid') {
-        const result = await doSearch(text);
-        let searchContext = '';
-        if (result.data.answer) searchContext += 'Answer: ' + result.data.answer + '\n\n';
-        const results = result.data.results || [];
-        results.slice(0, 5).forEach(function(r, i) {
-          searchContext += '[' + (i + 1) + '] ' + (r.title || '') + '\nURL: ' + (r.url || '') + '\n' + (r.content || r.snippet || (r.highlights || []).join(' ') || '') + '\n\n';
+        const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + NVIDIA_API_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: conversation,
+            temperature: 0.7,
+            max_tokens: MAX_TOKENS,
+            stream: false
+          })
         });
-        if (!searchContext) { const plain = result.formatted.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(); searchContext = plain; }
 
-        const hybridMessages = [
-          { role: 'system', content: 'You are a helpful AI assistant. Use the following search results to answer the user accurately. Cite sources when relevant.\n\nSearch Results:\n' + searchContext }
-        ].concat(state.messages);
-        var aiRes = await chatNVIDIA(hybridMessages);
-        content = aiRes.content;
-        source = 'Hybrid (' + result.engine + ' + ' + aiRes.model.split('/').pop() + ')';
-        icon = '🚀';
-      } else {
-        var aiRes2 = await chatNVIDIA(state.messages);
-        content = aiRes2.content;
-        source = aiRes2.model.split('/').pop();
-        icon = '🤖';
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(res.status + ': ' + (err.substring(0, 100) || 'API Error'));
+        }
+
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content || 'No response';
+
+        thinkingMsg.remove();
+        addMessage('ai', reply);
+        conversation.push({ role: 'assistant', content: reply });
+      } catch (err) {
+        thinkingMsg.remove();
+        addMessage('ai', 'Error: ' + err.message);
+      } finally {
+        loading = false;
+        sendBtn.disabled = false;
+        inputEl.focus();
       }
-
-      const elapsed = Date.now() - startTime;
-      thinkingDiv.remove();
-      responseTime.textContent = elapsed + 'ms';
-      addMessage('ai', content, { source: source, icon: icon, isHtml: isHtml });
-      state.messages.push({ role: 'assistant', content: isHtml ? content.replace(/<[^>]+>/g, ' ') : content });
-      state.history.push({ text: text, response: isHtml ? content.replace(/<[^>]+>/g, ' ') : content, timestamp: new Date() });
-      messageCount.textContent = state.messages.length;
-    } catch (err) {
-      thinkingDiv.remove();
-      addMessage('ai', '❌ Error: ' + err.message, { icon: '⚠️' });
-    } finally {
-      state.loading = false;
-      sendBtn.disabled = false;
-      messageInput.focus();
     }
-  }
 
-  window.addEventListener('click', function(e) {
-    if (e.target === historyModal) historyModal.style.display = 'none';
-  });
-</script>
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Clear chat?')) {
+        conversation = [];
+        messagesEl.innerHTML = '';
+      }
+    });
 
+    sendBtn.addEventListener('click', callAI);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        callAI();
+      }
+    });
+    inputEl.addEventListener('input', () => {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
+    });
+
+    // Initial message
+    addMessage('ai', 'Hello! I am CRAXTEN, your AI assistant.\n\nAsk me anything!');
+    inputEl.focus();
+  </script>
 </body>
 </html>
