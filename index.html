@@ -677,7 +677,7 @@
           const item = state.history[idx];
           messageInput.value = item.text;
           historyModal.style.display = 'none';
-          messageInput.focus();
+          sendMessage();
         });
       });
     }
@@ -738,7 +738,7 @@
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
-      document.getElementById('tab-' + e.target.dataset.tab).classList.add('active');
+      document.getElementById(e.target.dataset.tab).classList.add('active');
     });
   });
 
@@ -1094,7 +1094,7 @@
         results.slice(0, 5).forEach(function(r, i) {
           searchContext += '[' + (i + 1) + '] ' + (r.title || '') + '\nURL: ' + (r.url || '') + '\n' + (r.content || r.snippet || (r.highlights || []).join(' ') || '') + '\n\n';
         });
-        if (!searchContext) searchContext = result.formatted.replace(/<[^>]+>/g, ' ');
+        if (!searchContext) { const plain = result.formatted.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(); searchContext = plain; }
 
         const hybridMessages = [
           { role: 'system', content: 'You are a helpful AI assistant. Use the following search results to answer the user accurately. Cite sources when relevant.\n\nSearch Results:\n' + searchContext }
