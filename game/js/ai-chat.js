@@ -41,13 +41,26 @@ class AIChatManager {
             this.chatBtn.addEventListener('click', () => this.toggleChatbox());
         }
         
-        // Set API key from prompt if not set
+        // Try to get API key from input system
+        if (typeof inputSystem !== 'undefined' && inputSystem && inputSystem.isApiKeySet()) {
+            this.apiKey = inputSystem.getApiKey();
+        }
+        
+        // If still no API key, check localStorage
         if (!this.apiKey) {
-            this.apiKey = prompt('Groq API Key দিন:', '');
-            if (!this.apiKey) {
-                console.warn('Groq API Key required for AI chat');
+            const savedKey = localStorage.getItem('groq_api_key');
+            if (savedKey) {
+                this.apiKey = savedKey;
             }
         }
+        
+        // If still no API key, show warning
+        if (!this.apiKey) {
+            console.warn('Groq API Key not set. AI chat will not work.');
+        }
+        
+        // Start time sync
+        this.startTimeSync();
         
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', () => this.closeChatbox());

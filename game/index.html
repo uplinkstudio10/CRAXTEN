@@ -21,9 +21,156 @@
         #game-canvas {
             -webkit-tap-highlight-color: transparent;
         }
+        
+        /* Input modal styles */
+        #input-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 30000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        #input-modal.hidden {
+            display: none;
+        }
+        
+        .modal-content {
+            background: rgba(10, 10, 26, 0.9);
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 255, 170, 0.2);
+        }
+        
+        .modal-title {
+            color: #00ffaa;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        
+        .modal-description {
+            color: #888;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #00ffaa;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.1);
+        }
+        
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #00ffaa, #00aaff);
+            color: #000;
+        }
+        
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .modal-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .api-info {
+            background: rgba(0, 255, 170, 0.1);
+            border-left: 3px solid #00ffaa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #00ffaa;
+        }
+        
+        .api-info a {
+            color: #00aaff;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Input Modal -->
+    <div id="input-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">API Key দিন</h2>
+            <p class="modal-description">
+                Groq AI ব্যবহার করার জন্য API Key প্রয়োজন। এই কীটি শুধু আপনার ব্রাউজারে সেভ হবে।
+            </p>
+            <input type="password" id="api-key-input" class="input-field" 
+                   placeholder="Enter your Groq API key" 
+                   autocomplete="off" spellcheck="false">
+            <div class="api-info">
+                কী পাবেন: <a href="https://console.groq.com/keys" target="_blank">Groq Console</a>
+            </div>
+            <div class="modal-buttons">
+                <button id="save-api-key" class="modal-btn primary">সেভ করুন</button>
+                <button id="skip-api" class="modal-btn secondary">পরবর্তীতে</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Screen -->
     <div id="loading">
         <div class="loader"></div>
@@ -43,7 +190,7 @@
     <div id="ai-container">
         <button id="ai-chat-btn" class="ai-floating-btn">
             <span class="ai-icon">🤖</span>
-            <span class="ai-label">AI Assistant</span>
+            <span class="ai-label">AI</span>
         </button>
     </div>
 
@@ -125,12 +272,17 @@
         <span id="current-time">00:00:00</span>
     </div>
 
+    <!-- Settings Button (Transparent) -->
+    <div id="settings-container" class="transparent-hud">
+        <button id="settings-btn" class="settings-btn transparent">⚙️</button>
+    </div>
+
     <!-- Touch Controls Overlay -->
     <div id="touch-overlay">
-        <div class="touch-steering-left" id="steering-left"></div>
-        <div class="touch-steering-right" id="steering-right"></div>
-        <div class="touch-throttle" id="touch-throttle"></div>
-        <div class="touch-brake" id="touch-brake"></div>
+        <div class="touch-steering-left" id="steering-left">←</div>
+        <div class="touch-steering-right" id="steering-right">→</div>
+        <div class="touch-throttle" id="touch-throttle">↑</div>
+        <div class="touch-brake" id="touch-brake">↓</div>
     </div>
 
     <!-- Three.js Library -->
@@ -144,6 +296,7 @@
     <script src="js/world.js"></script>
     <script src="js/physics.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/input-system.js"></script>
     <script src="js/ai-chat.js"></script>
     <script src="js/main.js"></script>
 </body>
