@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Porsche Driving - Mobile AI</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/ui.css">
+    <style>
+        /* Critical mobile-only styles */
+        html, body {
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        #game-canvas {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loader"></div>
+        <h2>PORSCHE DRIVING</h2>
+        <p>Loading Mobile Experience...</p>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- AI Chat Button (ONLY VISIBLE BUTTON) -->
+    <div id="ai-container">
+        <button id="ai-chat-btn" class="ai-floating-btn">
+            <span class="ai-icon">🤖</span>
+            <span class="ai-label">AI Assistant</span>
+        </button>
+    </div>
+
+    <!-- AI Chatbox (Transparent Background) -->
+    <div id="ai-chatbox" class="hidden">
+        <div class="chatbox-header">
+            <span class="chatbox-title">AI Assistant (Groq Llama 405B)</span>
+            <button id="close-chatbox" class="chatbox-close">×</button>
+        </div>
+        <div class="chatbox-messages" id="chat-messages">
+            <div class="chat-message ai">
+                <span class="message-sender">AI:</span>
+                <span class="message-text">হয়, আমি কীভাবে আপনাকে সাহায্য করতে পারি?</span>
+            </div>
+        </div>
+        <div class="chatbox-input">
+            <input type="text" id="ai-input" placeholder="আপনার প্রশ্ন লিখুন..." autocomplete="off">
+            <button id="ai-send-btn" class="send-btn">→</button>
+        </div>
+    </div>
+
+    <!-- Transparent HUD (Top Right) -->
+    <div id="hud-top-right" class="transparent-hud">
+        <div class="hud-panel transparent">
+            <div class="hud-item">
+                <span class="hud-label">FPS</span>
+                <span id="fps-counter" class="hud-value">0</span>
+            </div>
+        </div>
+        <div class="hud-panel transparent">
+            <div class="hud-item">
+                <span class="hud-label">S.T.Z</span>
+                <span id="stz-display" class="hud-value">0 / 00:00 / START</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transparent Speed Display -->
+    <div id="speed-display" class="transparent-hud">
+        <span id="speed-value">0</span>
+        <span id="speed-unit">km/h</span>
+    </div>
+
+    <!-- Transparent Gear Display -->
+    <div id="gear-display" class="transparent-hud">P</div>
+
+    <!-- Transparent Controls (Bottom Left) -->
+    <div id="controls-left" class="transparent-hud">
+        <div class="control-group">
+            <span class="control-label">BOOST</span>
+            <button id="boostBtn" class="control-btn boost transparent">NITRO</button>
+        </div>
+        <div class="control-group">
+            <span class="control-label">ACCELERATE</span>
+            <button id="accelerateBtn" class="control-btn accelerate transparent">GAS</button>
+        </div>
+        <div class="control-group">
+            <span class="control-label">BRAKE</span>
+            <button id="brakeBtn" class="control-btn brake transparent">BRAKE</button>
+        </div>
+        <div class="control-group">
+            <span class="control-label">HANDBRAKE</span>
+            <button id="handbrakeBtn" class="control-btn handbrake transparent">HOLD</button>
+        </div>
+    </div>
+
+    <!-- Transparent Info (Bottom Center) -->
+    <div id="info-center" class="transparent-hud">
+        <p>Swipe to steer | Tap buttons to control</p>
+    </div>
+
+    <!-- Audio Toggle (Transparent) -->
+    <div id="audio-toggle" class="hud-panel transparent-hud">
+        <button id="muteBtn" class="audio-btn transparent">🔊</button>
+    </div>
+
+    <!-- Real Time Clock Display -->
+    <div id="realtime-clock" class="transparent-hud">
+        <span id="current-time">00:00:00</span>
+    </div>
+
+    <!-- Touch Controls Overlay -->
+    <div id="touch-overlay">
+        <div class="touch-steering-left" id="steering-left"></div>
+        <div class="touch-steering-right" id="steering-right"></div>
+        <div class="touch-throttle" id="touch-throttle"></div>
+        <div class="touch-brake" id="touch-brake"></div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Game Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/audio-manager.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/car.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/ai-chat.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
